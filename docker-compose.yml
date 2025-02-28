@@ -1,0 +1,36 @@
+version: "3.2"
+
+services:
+  task-management-system:
+    container_name: task-management-system
+    build: .
+    environment:
+      DATABASESERVER_PORT: "5432"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgredb:5432/postgres
+    depends_on:
+      - postgredb
+    ports:
+      - 8088:8080
+    networks:
+      - backend
+  postgredb:
+    image: postgres:13.1-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - ~/app/postgresql:/data
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=postgres
+    networks:
+      - backend
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  backend:
+    driver: bridge
